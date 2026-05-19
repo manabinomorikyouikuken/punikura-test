@@ -1,0 +1,776 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <title>ぷにくら日和 | 今日は何の日？</title>
+  <style>
+    :root {
+      --bg: #eaf8ff;
+      --bg-deep: #b8e6fb;
+      --card: #ffffff;
+      --card-blue: #f4fbff;
+      --ink: #203052;
+      --muted: #607093;
+      --line: #8fa5de;
+      --purple: #d9ccff;
+      --purple-deep: #6f62b8;
+      --blue: #58b5e8;
+      --blue-deep: #2773b4;
+      --pink: #ff9fc8;
+      --sand: #fff7df;
+      --shadow: 0 10px 0 rgba(86, 116, 174, 0.16);
+      --nav-height: 78px;
+      --shell-overlay: rgba(255, 255, 255, 0.66);
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Yu Gothic", sans-serif;
+      color: var(--ink);
+      background: var(--bg);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100dvh;
+      background: var(--bg);
+      font-size: 18px;
+      line-height: 1.65;
+      letter-spacing: 0;
+    }
+
+    button {
+      font: inherit;
+      color: inherit;
+    }
+
+    .app-shell {
+      min-height: 100dvh;
+      position: relative;
+      overflow-x: hidden;
+      background-image: linear-gradient(180deg, #fff9ec 0%, var(--bg) 42%, var(--bg-deep) 100%);
+      background-position: center top;
+      background-repeat: no-repeat;
+      background-size: cover;
+    }
+
+    .app-shell.theme-day {
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.28)),
+        url("./assets/backgrounds/bg-day.webp");
+      --shell-overlay: rgba(255, 255, 255, 0.68);
+    }
+
+    .app-shell.theme-evening {
+      background-image:
+        linear-gradient(rgba(255, 248, 244, 0.18), rgba(255, 255, 255, 0.34)),
+        url("./assets/backgrounds/bg-evening.webp");
+      --shell-overlay: rgba(255, 255, 255, 0.7);
+    }
+
+    .app-shell.theme-night {
+      background-image:
+        linear-gradient(rgba(18, 28, 68, 0.16), rgba(255, 255, 255, 0.38)),
+        url("./assets/backgrounds/bg-night.webp");
+      --shell-overlay: rgba(255, 255, 255, 0.78);
+    }
+
+    .app-shell.theme-midnight {
+      background-image:
+        linear-gradient(rgba(5, 10, 30, 0.30), rgba(5, 10, 30, 0.55)),
+        url("./assets/backgrounds/bg-midnight.webp");
+      --shell-overlay: rgba(255, 255, 255, 0.82);
+    }
+
+    .app-shell::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, var(--shell-overlay), rgba(255, 255, 255, 0.48)),
+        radial-gradient(circle at 50% 22%, rgba(255, 255, 255, 0.65), transparent 44%);
+    }
+
+    .app {
+      width: min(100%, 430px);
+      min-height: 100dvh;
+      margin: 0 auto;
+      position: relative;
+      z-index: 1;
+      overflow: hidden;
+      padding: 18px 18px calc(var(--nav-height) + 22px);
+      background:
+        radial-gradient(circle at 14% 16%, rgba(255, 255, 255, 0.95) 0 7px, transparent 8px),
+        radial-gradient(circle at 86% 22%, rgba(255, 255, 255, 0.8) 0 10px, transparent 11px),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.76), rgba(211, 240, 253, 0.78));
+    }
+
+    .app::before,
+    .app::after {
+      content: "";
+      position: absolute;
+      left: -12px;
+      right: -12px;
+      height: 94px;
+      pointer-events: none;
+      background:
+        linear-gradient(135deg, transparent 0 22px, rgba(105, 179, 218, 0.28) 23px 46px, transparent 47px),
+        linear-gradient(225deg, transparent 0 22px, rgba(136, 197, 229, 0.28) 23px 46px, transparent 47px);
+      background-size: 92px 92px;
+      opacity: 0.9;
+    }
+
+    .app::before {
+      bottom: 50px;
+    }
+
+    .app::after {
+      bottom: 8px;
+      opacity: 0.55;
+      transform: translateX(34px);
+    }
+
+    .screen {
+      display: none;
+      position: relative;
+      z-index: 1;
+      min-height: calc(100dvh - var(--nav-height) - 40px);
+    }
+
+    .screen.is-active {
+      display: grid;
+      align-content: start;
+      gap: 18px;
+    }
+
+    .pixel-panel {
+      border: 3px solid var(--line);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, 0.94);
+      box-shadow: var(--shadow);
+      image-rendering: pixelated;
+    }
+
+    .hero {
+      display: grid;
+      justify-items: center;
+      gap: 14px;
+      padding-top: 10px;
+      text-align: center;
+    }
+
+    .brand {
+      margin: 0;
+      font-size: clamp(32px, 9vw, 42px);
+      line-height: 1.08;
+      font-weight: 900;
+      color: var(--ink);
+      text-shadow:
+        0 3px 0 #ffffff,
+        3px 0 0 #ffffff,
+        0 5px 0 rgba(111, 98, 184, 0.16);
+    }
+
+    .subtitle {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 4px 18px;
+      margin: 0;
+      border: 3px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.92);
+      font-size: 22px;
+      font-weight: 800;
+      color: #31416b;
+    }
+
+    .character-stage {
+      width: min(80vw, 310px);
+      min-height: 262px;
+      display: grid;
+      place-items: center;
+      margin: 2px 0 4px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .character-frame {
+      width: fit-content;
+      margin: 0;
+      position: relative;
+      display: grid;
+      place-items: center;
+      isolation: isolate;
+    }
+
+    .character-img {
+      display: block;
+      position: relative;
+      z-index: 1;
+      object-fit: contain;
+      max-width: 100%;
+      height: auto;
+      image-rendering: auto;
+      filter: drop-shadow(0 8px 0 rgba(83, 112, 174, 0.16));
+    }
+
+    .character-hero {
+      width: clamp(226px, 70vw, 306px);
+      animation: floaty 4.8s ease-in-out infinite;
+    }
+
+    .character-card-frame {
+      width: 58px;
+      height: 58px;
+    }
+
+    .character-card {
+      width: 58px;
+      height: 58px;
+      filter: drop-shadow(0 4px 0 rgba(83, 112, 174, 0.13));
+    }
+
+    .character-fallback {
+      display: none;
+      width: 68%;
+      aspect-ratio: 1;
+      place-items: center;
+      border: 3px solid #5f75be;
+      border-radius: 44% 44% 24% 24%;
+      background: linear-gradient(145deg, #e9fbff, #d9d2ff);
+      color: var(--blue-deep);
+      font-size: 24px;
+      font-weight: 900;
+      line-height: 1;
+      box-shadow: 0 5px 0 rgba(83, 112, 174, 0.13);
+    }
+
+    .character-card-frame .character-fallback {
+      width: 54px;
+      font-size: 14px;
+    }
+
+    .character-frame.is-missing .character-img {
+      display: none;
+    }
+
+    .character-frame.is-missing .character-fallback {
+      display: grid;
+    }
+
+    .actions {
+      display: grid;
+      gap: 12px;
+      width: 100%;
+    }
+
+    .button {
+      min-height: 58px;
+      width: 100%;
+      border: 3px solid var(--blue-deep);
+      border-radius: 12px;
+      padding: 12px 18px;
+      background: #ffffff;
+      color: var(--ink);
+      font-size: 19px;
+      font-weight: 800;
+      box-shadow: 0 5px 0 rgba(39, 115, 180, 0.22);
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .button.primary {
+      background: linear-gradient(180deg, #ffffff 0%, #d9f3ff 100%);
+    }
+
+    .button.secondary {
+      border-color: var(--purple-deep);
+      background: linear-gradient(180deg, #ffffff 0%, #f1edff 100%);
+      box-shadow: 0 5px 0 rgba(111, 98, 184, 0.2);
+    }
+
+    .button:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 rgba(39, 115, 180, 0.2);
+    }
+
+    .button:focus-visible,
+    .nav-button:focus-visible {
+      outline: 4px solid #ffe27d;
+      outline-offset: 3px;
+    }
+
+    .status {
+      min-height: 30px;
+      margin: 0;
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--muted);
+      text-align: center;
+    }
+
+    .topline {
+      display: grid;
+      gap: 8px;
+      padding-top: 6px;
+    }
+
+    .date {
+      font-size: 20px;
+      font-weight: 900;
+      color: var(--blue-deep);
+    }
+
+    .theme {
+      margin: 0;
+      font-size: 28px;
+      line-height: 1.2;
+      font-weight: 900;
+    }
+
+    .label {
+      width: fit-content;
+      min-height: 32px;
+      display: inline-flex;
+      align-items: center;
+      padding: 2px 12px;
+      border: 2px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.9);
+      font-size: 16px;
+      font-weight: 800;
+      color: var(--muted);
+    }
+
+    .main-card {
+      padding: 22px 20px;
+      background:
+        linear-gradient(180deg, #ffffff 0%, var(--card-blue) 100%);
+    }
+
+    .card-text {
+      margin: 0;
+      font-size: 20px;
+      line-height: 1.75;
+      font-weight: 750;
+    }
+
+    .puniline {
+      display: grid;
+      grid-template-columns: 58px 1fr;
+      gap: 12px;
+      align-items: center;
+      min-height: 86px;
+      padding: 12px;
+      background: rgba(255, 255, 255, 0.9);
+      border: 3px solid rgba(143, 165, 222, 0.7);
+      border-radius: 14px;
+    }
+
+    .puniline p {
+      margin: 0;
+      font-size: 18px;
+      line-height: 1.55;
+      font-weight: 800;
+    }
+
+    .pager {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .word-list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .word-card {
+      padding: 16px 18px;
+      background: rgba(255, 255, 255, 0.94);
+    }
+
+    .word-lang {
+      margin: 0 0 4px;
+      font-size: 16px;
+      font-weight: 900;
+      color: var(--muted);
+    }
+
+    .word-main {
+      margin: 0;
+      font-size: 30px;
+      line-height: 1.2;
+      font-weight: 900;
+      color: var(--ink);
+      overflow-wrap: anywhere;
+    }
+
+    .word-note {
+      margin: 12px 0 0;
+      padding: 12px 14px;
+      border: 2px solid rgba(143, 165, 222, 0.65);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.9);
+      font-size: 18px;
+      font-weight: 750;
+      color: #31416b;
+    }
+
+    .bottom-nav {
+      position: fixed;
+      left: 50%;
+      bottom: 0;
+      z-index: 5;
+      transform: translateX(-50%);
+      width: min(100%, 430px);
+      min-height: calc(var(--nav-height) + env(safe-area-inset-bottom));
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 10px 12px calc(10px + env(safe-area-inset-bottom));
+      border-top: 3px solid rgba(111, 98, 184, 0.28);
+      background: rgba(255, 255, 255, 0.96);
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-button {
+      min-height: 58px;
+      border: 2px solid transparent;
+      border-radius: 12px;
+      background: transparent;
+      display: grid;
+      place-items: center;
+      gap: 1px;
+      font-size: 14px;
+      font-weight: 900;
+      color: var(--muted);
+      cursor: pointer;
+      touch-action: manipulation;
+    }
+
+    .nav-mark {
+      width: 24px;
+      height: 20px;
+      border: 3px solid currentColor;
+      border-radius: 8px 8px 5px 5px;
+      background: rgba(255, 255, 255, 0.8);
+    }
+
+    .nav-button.is-active {
+      border-color: var(--line);
+      background: #eef9ff;
+      color: var(--blue-deep);
+    }
+
+    @keyframes floaty {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-8px); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        scroll-behavior: auto !important;
+      }
+    }
+
+    @media (max-width: 360px) {
+      .app {
+        padding-inline: 14px;
+      }
+
+      .brand {
+        font-size: 31px;
+      }
+
+      .theme {
+        font-size: 25px;
+      }
+
+      .word-main {
+        font-size: 28px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-shell theme-day">
+  <main class="app" aria-live="polite">
+    <section id="home-screen" class="screen is-active" aria-labelledby="home-title">
+      <div class="hero">
+        <h1 id="home-title" class="brand">ぷにくら日和</h1>
+        <p class="subtitle">今日は何の日？</p>
+
+        <div class="character-stage">
+          <figure class="character-frame">
+            <img
+              class="character-img character-hero"
+              src="./assets/characters/punikurage-normal.png"
+              alt="にこにこしているぷにくらげ"
+              width="512"
+              height="512"
+            >
+            <span class="character-fallback" aria-hidden="true">ぷに</span>
+          </figure>
+        </div>
+
+        <div class="actions" aria-label="ホームの操作">
+          <button class="button primary" type="button" data-go="today">今日のぷにカードを読む</button>
+          <button id="favorite-button" class="button secondary" type="button">お気に入りに入れる</button>
+          <p id="favorite-status" class="status">1日1枚、ゆっくり読めます。</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="today-screen" class="screen" aria-labelledby="today-title">
+      <div class="topline">
+        <span id="today-date" class="date"></span>
+        <span class="label">試作カード</span>
+        <h2 id="today-title" class="theme"></h2>
+      </div>
+
+      <article class="main-card pixel-panel">
+        <p id="today-body" class="card-text"></p>
+      </article>
+
+      <aside class="puniline" aria-label="ぷにくらげの一言">
+        <span class="character-frame character-card-frame" aria-hidden="true">
+          <img
+            class="character-img character-card"
+            src="./assets/characters/punikurage-smile.png"
+            alt=""
+            width="512"
+            height="512"
+          >
+          <span class="character-fallback">ぷに</span>
+        </span>
+        <p id="today-line"></p>
+      </aside>
+
+      <div class="pager" aria-label="カード移動">
+        <button class="button secondary" type="button" id="prev-card">前へ</button>
+        <button class="button primary" type="button" id="next-card">次へ</button>
+      </div>
+    </section>
+
+    <section id="word-screen" class="screen" aria-labelledby="word-title">
+      <div class="topline">
+        <span class="label">ことばカード</span>
+        <h2 id="word-title" class="theme">今日のことば</h2>
+      </div>
+
+      <div class="word-list" aria-label="日本語、英語、スワヒリ語">
+        <article class="word-card pixel-panel">
+          <p class="word-lang">日本語</p>
+          <p id="word-ja" class="word-main"></p>
+        </article>
+        <article class="word-card pixel-panel">
+          <p class="word-lang">英語</p>
+          <p id="word-en" class="word-main"></p>
+        </article>
+        <article class="word-card pixel-panel">
+          <p class="word-lang">スワヒリ語</p>
+          <p id="word-sw" class="word-main"></p>
+        </article>
+      </div>
+
+      <p id="word-note" class="word-note"></p>
+    </section>
+  </main>
+
+  <nav class="bottom-nav" aria-label="下部ナビゲーション">
+    <button class="nav-button is-active" type="button" data-go="home" aria-current="page">
+      <span class="nav-mark" aria-hidden="true"></span>
+      ホーム
+    </button>
+    <button class="nav-button" type="button" data-go="today">
+      <span class="nav-mark" aria-hidden="true"></span>
+      今日
+    </button>
+    <button class="nav-button" type="button" data-go="word">
+      <span class="nav-mark" aria-hidden="true"></span>
+      ことば
+    </button>
+  </nav>
+  </div>
+
+  <script>
+    const cards = [
+      {
+        theme: "ことばをひとつ持ち帰る日",
+        body: "知らない言葉に出会うと、世界の入口がひとつ増えます。今日は一語だけで十分。急がず、ぷにっと覚えましょう。",
+        line: "一語でも、今日は前進です。",
+        word: {
+          ja: "水",
+          en: "water",
+          sw: "maji",
+          note: "命や生活に近い言葉から覚えると、旅先でも使いやすくなります。"
+        }
+      },
+      {
+        theme: "ゆっくり整える日",
+        body: "たくさん読むより、ひとつ分かるほうが残る日もあります。今日は目と心を休ませながら、短く学びます。",
+        line: "ふわっと読めば大丈夫。",
+        word: {
+          ja: "ゆっくり",
+          en: "slowly",
+          sw: "polepole",
+          note: "スワヒリ語の polepole は、急ぎすぎない気持ちも伝わる便利な言葉です。"
+        }
+      },
+      {
+        theme: "世界とつながる日",
+        body: "日本語、英語、スワヒリ語。並べて見るだけで、同じものを違う音で呼ぶおもしろさに気づけます。",
+        line: "違う音、同じ気持ち。",
+        word: {
+          ja: "友だち",
+          en: "friend",
+          sw: "rafiki",
+          note: "rafiki は東アフリカでよく使う基本語です。人との距離を少し近づけます。"
+        }
+      },
+      {
+        theme: "小さな歴史に気づく日",
+        body: "歴史は大きな事件だけではありません。服、食べ物、言葉、道具にも、人が生きてきた跡が残っています。",
+        line: "身近なものにも、歴史あり。",
+        word: {
+          ja: "歴史",
+          en: "history",
+          sw: "historia",
+          note: "history と historia は形が近く、言葉のつながりを感じやすい組み合わせです。"
+        }
+      }
+    ];
+
+    const today = new Date();
+    const state = {
+      cardIndex: Math.abs(Math.floor(today.getTime() / 86400000)) % cards.length,
+      screen: "home"
+    };
+
+    const screenMap = {
+      home: document.getElementById("home-screen"),
+      today: document.getElementById("today-screen"),
+      word: document.getElementById("word-screen")
+    };
+
+    const navButtons = Array.from(document.querySelectorAll(".nav-button"));
+    const favoriteButton = document.getElementById("favorite-button");
+    const favoriteStatus = document.getElementById("favorite-status");
+    const appShell = document.querySelector(".app-shell");
+    const characterImages = Array.from(document.querySelectorAll(".character-img"));
+
+    function themeForHour(hour) {
+      if (hour >= 5 && hour <= 15) return "theme-day";
+      if (hour >= 16 && hour <= 18) return "theme-evening";
+      if (hour >= 19 && hour <= 22) return "theme-night";
+      return "theme-midnight";
+    }
+
+    function applyTimeTheme(date) {
+      appShell.classList.remove("theme-day", "theme-evening", "theme-night", "theme-midnight");
+      appShell.classList.add(themeForHour(date.getHours()));
+    }
+
+    function formatDate(date) {
+      return new Intl.DateTimeFormat("ja-JP", {
+        month: "long",
+        day: "numeric",
+        weekday: "short"
+      }).format(date);
+    }
+
+    function currentCard() {
+      return cards[state.cardIndex];
+    }
+
+    function renderCard() {
+      const card = currentCard();
+      document.getElementById("today-date").textContent = formatDate(today);
+      document.getElementById("today-title").textContent = card.theme;
+      document.getElementById("today-body").textContent = card.body;
+      document.getElementById("today-line").textContent = card.line;
+      document.getElementById("word-ja").textContent = card.word.ja;
+      document.getElementById("word-en").textContent = card.word.en;
+      document.getElementById("word-sw").textContent = card.word.sw;
+      document.getElementById("word-note").textContent = card.word.note;
+      updateFavoriteUi();
+    }
+
+    function go(screen) {
+      state.screen = screen;
+      Object.entries(screenMap).forEach(([key, element]) => {
+        element.classList.toggle("is-active", key === screen);
+      });
+      navButtons.forEach((button) => {
+        const active = button.dataset.go === screen;
+        button.classList.toggle("is-active", active);
+        if (active) {
+          button.setAttribute("aria-current", "page");
+        } else {
+          button.removeAttribute("aria-current");
+        }
+      });
+      window.scrollTo(0, 0);
+    }
+
+    function storageKey() {
+      return `punikura-favorite-${state.cardIndex}`;
+    }
+
+    function isFavorite() {
+      return localStorage.getItem(storageKey()) === "1";
+    }
+
+    function updateFavoriteUi() {
+      const selected = isFavorite();
+      favoriteButton.textContent = selected ? "お気に入りから外す" : "お気に入りに入れる";
+      favoriteStatus.textContent = selected
+        ? "今日のぷにカードを保存しました。"
+        : "1日1枚、ゆっくり読めます。";
+    }
+
+    document.querySelectorAll("[data-go]").forEach((button) => {
+      button.addEventListener("click", () => go(button.dataset.go));
+    });
+
+    favoriteButton.addEventListener("click", () => {
+      if (isFavorite()) {
+        localStorage.removeItem(storageKey());
+      } else {
+        localStorage.setItem(storageKey(), "1");
+      }
+      updateFavoriteUi();
+    });
+
+    characterImages.forEach((image) => {
+      image.addEventListener("error", () => {
+        image.closest(".character-frame")?.classList.add("is-missing");
+      });
+    });
+
+    document.getElementById("prev-card").addEventListener("click", () => {
+      state.cardIndex = (state.cardIndex - 1 + cards.length) % cards.length;
+      renderCard();
+    });
+
+    document.getElementById("next-card").addEventListener("click", () => {
+      state.cardIndex = (state.cardIndex + 1) % cards.length;
+      renderCard();
+    });
+
+    applyTimeTheme(today);
+    renderCard();
+  </script>
+</body>
+</html>
